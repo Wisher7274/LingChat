@@ -52,6 +52,27 @@
           <Cat :size="18" />
           <span>主动对话</span>
         </button>
+        <button
+          class="w-full flex items-center space-x-6 px-5 py-3 no-underline rounded-lg text-white transition-colors duration-200 relative z-10 adv-nav-link hover:bg-gray-200 hover:text-black active:text-white active:font-bold"
+          @click="changeView('tool_calls')"
+        >
+          <Wrench :size="18" />
+          <span>工具记录</span>
+        </button>
+        <button
+          class="w-full flex items-center space-x-6 px-5 py-3 no-underline rounded-lg text-white transition-colors duration-200 relative z-10 adv-nav-link hover:bg-gray-200 hover:text-black active:text-white active:font-bold"
+          @click="changeView('memories')"
+        >
+          <Brain :size="18" />
+          <span>记忆库</span>
+        </button>
+        <button
+          class="w-full flex items-center space-x-6 px-5 py-3 no-underline rounded-lg text-white transition-colors duration-200 relative z-10 adv-nav-link hover:bg-gray-200 hover:text-black active:text-white active:font-bold"
+          @click="changeView('sandbox')"
+        >
+          <Shield :size="18" />
+          <span>代码沙盒</span>
+        </button>
       </nav>
 
       <div class="mt-auto mb-6 p-4 bg-cyan-50/10 rounded-2xl border border-cyan-500/20">
@@ -82,6 +103,7 @@
         </div>
 
         <button
+          v-if="canCreate"
           @click="triggerCreate"
           class="bg-cyan-500 hover:bg-cyan-600 text-white px-5 py-2.5 rounded-xl shadow-lg transition-all flex items-center space-x-2"
         >
@@ -102,18 +124,24 @@
         <CalendarPage ref="calendarRef" />
 
         <ProactivePage ref="proactiveRef" />
+        <ToolCallsPage />
+        <MemoryPage ref="memoryRef" />
+        <SandboxPage />
       </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, reactive } from 'vue'
-import { useUIStore } from '@/stores/modules/ui/ui'
+import { computed, ref } from 'vue'
+import { useUIStore, type ScheduleViewType } from '@/stores/modules/ui/ui'
 import TodoPage from '@/components/settings/pages/Schedule/TodoPage.vue'
 import SchedulePage from '@/components/settings/pages/Schedule/SchedulePage.vue'
 import CalendarPage from '@/components/settings/pages/Schedule/CalendarPage.vue'
 import ProactivePage from '../settings/pages/Schedule/ProactivePage.vue'
+import ToolCallsPage from '@/components/settings/pages/Schedule/ToolCallsPage.vue'
+import SandboxPage from '@/components/settings/pages/Schedule/SandboxPage.vue'
+import MemoryPage from '@/components/settings/pages/Schedule/MemoryPage.vue'
 import {
   Layers,
   CheckCircle2,
@@ -123,6 +151,9 @@ import {
   ChevronLeft,
   Sparkles,
   PawPrint,
+  Wrench,
+  Shield,
+  Brain,
 } from 'lucide-vue-next'
 
 type Variant = 'settings' | 'popup'
@@ -138,6 +169,10 @@ const scheduleRef = ref()
 const todoRef = ref()
 const calendarRef = ref()
 const proactiveRef = ref()
+const memoryRef = ref()
+const canCreate = computed(() => {
+  return !['proactive_settings', 'tool_calls', 'sandbox'].includes(uiStore.scheduleView)
+})
 const titleInfo = computed(() => {
   const currentView = uiStore.scheduleView
 
@@ -160,6 +195,21 @@ const titleInfo = computed(() => {
     return {
       title: '君の重要な日',
       subtitle: '可以记下你朋友的生日自动提醒哦',
+    }
+  } else if (currentView === 'tool_calls') {
+    return {
+      title: '工具调用记录',
+      subtitle: '查看 LingChat AI 最近使用过的内部工具',
+    }
+  } else if (currentView === 'memories') {
+    return {
+      title: '记忆库',
+      subtitle: '像 Codex 记忆一样，保存希望 AI 以后参考的要点',
+    }
+  } else if (currentView === 'sandbox') {
+    return {
+      title: '代码沙盒',
+      subtitle: 'AI 可安全读写文件和执行命令的工作空间',
     }
   } else {
     // 默认情况
@@ -185,10 +235,12 @@ const triggerCreate = () => {
   } else if (currentView === 'calendar') {
     // 日历视图
     calendarRef.value?.handleCreate()
+  } else if (currentView === 'memories') {
+    memoryRef.value?.handleCreate()
   }
 }
 
-const changeView = (view: string) => {
+const changeView = (view: ScheduleViewType) => {
   uiStore.scheduleView = view
 }
 

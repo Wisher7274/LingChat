@@ -7,6 +7,9 @@
     <PomodoroPanel />
     <SchedulePanel />
   </div>
+
+  <!-- RoleMoodBadge 内部自己管理定位，无需额外容器 -->
+  <RoleMoodBadge />
 </template>
 
 <script setup lang="ts">
@@ -14,6 +17,7 @@ import { computed } from 'vue'
 import { useGameStore } from '@/stores/modules/game'
 import PomodoroPanel from '@/components/pomodoro/PomodoroPanel.vue'
 import SchedulePanel from '@/components/schedule/SchedulePanel.vue'
+import RoleMoodBadge from './RoleMoodBadge.vue'
 
 const gameStore = useGameStore()
 

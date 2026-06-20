@@ -91,12 +91,14 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useGameStore } from '@/stores/modules/game'
 import { useUIStore } from '@/stores/modules/ui/ui'
+import { useSettingsStore } from '@/stores/modules/settings'
 import { History, Volume2 } from 'lucide-vue-next'
 import type { GameMessage } from '@/stores/modules/game/state'
 import { API_CONFIG } from '@/controllers/core/config'
 
 const gameStore = useGameStore()
 const uiStore = useUIStore()
+const settingsStore = useSettingsStore()
 
 const visible = ref(false)
 const contentRef = ref<HTMLElement | null>(null)
@@ -249,6 +251,8 @@ const WHEEL_THRESHOLD = 80
 const handleWheel = (e: WheelEvent) => {
   if (uiStore.showSettings) return
   if (visible.value) return
+  if (settingsStore.codeMode) return // Code 模式下禁用滚轮呼出历史记录
+  if (shouldIgnoreWheelTarget(e.target)) return
 
   if (e.deltaY < 0) {
     wheelAccumulator += Math.abs(e.deltaY)
@@ -259,6 +263,22 @@ const handleWheel = (e: WheelEvent) => {
   } else {
     wheelAccumulator = Math.max(0, wheelAccumulator - Math.abs(e.deltaY))
   }
+}
+
+const shouldIgnoreWheelTarget = (target: EventTarget | null): boolean => {
+  if (!(target instanceof Element)) return false
+  return Boolean(
+    target.closest(
+      [
+        '[data-wheel-history-ignore]',
+        'button',
+        'input',
+        'textarea',
+        'select',
+        '[contenteditable="true"]',
+      ].join(','),
+    ),
+  )
 }
 
 defineExpose({ show, close, visible })

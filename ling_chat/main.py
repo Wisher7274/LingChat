@@ -83,7 +83,7 @@ def run_main_program(args, is_wv=False):
     from ling_chat.api.app_server import run_app_in_thread, stop_app_server
     from ling_chat.core.achievement_manager import AchievementManager
     from ling_chat.core.logger import logger
-    from ling_chat.core.webview import start_webview
+    from ling_chat.core.webview import WEBVIEW_AVAILABLE, start_webview
     from ling_chat.utils.cli import print_logo
     from ling_chat.utils.easter_egg import get_random_loading_message
     from ling_chat.utils.tts_auto_start import start_tts_software
@@ -137,7 +137,9 @@ def run_main_program(args, is_wv=False):
 
         # 检查环境变量决定是否启动前端界面
         if (
-            os.getenv("OPEN_FRONTEND_APP", "false").lower() == "true" and not args.nogui
+            os.getenv("OPEN_FRONTEND_APP", "false").lower() == "true"
+            and not args.nogui
+            and WEBVIEW_AVAILABLE
         ) or args.gui:
             logger.stop_loading_animation(success=True, final_message="应用加载成功")
             print_logo()
